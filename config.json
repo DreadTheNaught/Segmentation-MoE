@@ -1,0 +1,15 @@
+{
+  "LEARNING_RATE": 1e-4,
+  "DEVICE": "cuda",
+  "BATCH_SIZE": 1,
+  "NUM_EPOCHS": 5,
+  "NUM_WORKERS": 0,
+  "IMAGE_HEIGHT": 224,
+  "IMAGE_WIDTH": 224,
+  "PIN_MEMORY": true,
+  "LOAD_MODEL": false,
+  "TRAIN_IMG_DIR": "../data/carvana-image-masking-challenge/train/",
+  "TRAIN_MASK_DIR": "../data/carvana-image-masking-challenge/train_masks/",
+  "VAL_IMG_DIR": "../data/carvana-image-masking-challenge/val/",
+  "VAL_MASK_DIR": "../data/carvana-image-masking-challenge/val_masks/"
+}
