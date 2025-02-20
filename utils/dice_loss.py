@@ -167,10 +167,10 @@ def MutuallyExclusiveLoss(partial_segmentation_maps):
 
     for i in range(num_experts):
         for j in range(i + 1, num_experts):  # Avoid redundant comparisons
-            loss += helper_dice_similarity(
+            loss += dice_loss(
                 partial_segmentation_maps[i], partial_segmentation_maps[j])
 
-    loss = loss / (N * (N - 1))  # Normalize
+    loss = loss / ((N * (N - 1)) / 2)  # Normalize
     return loss
 
 

@@ -107,9 +107,6 @@ def save_predictions_as_imgs(
         torchvision.utils.save_image(
             preds, f'{saved_images_folder}/pred_{idx}.png'
         )
-        torchvision.utils.save_image(
-            y.unsqueeze(1), f'{saved_images_folder}/truth_{idx}.png'
-        )
         for layer in range(len(expert_outputs)):
             for expert in range(len(expert_outputs[0])):
                 torchvision.utils.save_image(
