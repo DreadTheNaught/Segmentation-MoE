@@ -128,7 +128,7 @@ def train_fn(loader, model, optimizer, loss_fn1, loss_fn2, scaler):
 
             predictions, expert_output = model(data)
             loss1, loss2 = loss_fn1(predictions, targets), loss_fn2(expert_output)
-            losses.append((loss1, loss2))
+            # losses.append((loss1, loss2))
             loss = loss1 + loss2
 
 
@@ -137,6 +137,7 @@ def train_fn(loader, model, optimizer, loss_fn1, loss_fn2, scaler):
         optimizer.zero_grad()
 
         scaler.scale(loss).backward()
+        # loss.backward()
         
         # plot_gradient_flow(model)
 
@@ -148,4 +149,4 @@ def train_fn(loader, model, optimizer, loss_fn1, loss_fn2, scaler):
 
         loop.set_postfix(loss=loss.item())
             
-    return losses
+    # return losses

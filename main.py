@@ -12,6 +12,10 @@ from utils.dice_loss import *
 from dataset import *
 import pickle
 
+torch.cuda.empty_cache()
+torch.cuda.reset_peak_memory_stats()
+
+
 with open("config.json", "r") as file:
     config = json.load(file)
 

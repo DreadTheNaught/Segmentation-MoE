@@ -49,7 +49,8 @@ class Flat_MoE(nn.Module):
         for expert_number in range(self.number_of_experts):
             router_output = self.router_list[expert_number](x)
             expert_output = self.expert_list[expert_number](x)
-            expert_output = router_output * expert_output
+            # expert_output = router_output * expert_output
+            expert_output = router_output.detach().view(-1, 1, 1, 1) * expert_output
             partial_segmentation_maps.append(expert_output)
 
         output = sum(partial_segmentation_maps)

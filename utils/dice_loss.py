@@ -163,6 +163,7 @@ def MutuallyExclusiveLoss(partial_segmentation_maps):
     num_experts = partial_segmentation_maps.shape[0]
     # Ensure gradient tracking
     loss = torch.tensor(0., device=partial_segmentation_maps.device)
+    # loss = partial_segmentation_maps.new_zeros(1)
     N = num_experts
 
     for i in range(num_experts):
