@@ -23,11 +23,18 @@ class Router(nn.Module):
     def __init__(self, in_channels):
         super(Router, self).__init__()
         self.router_layer = nn.Sequential(
+            # nn.Conv2d(in_channels, 64, 3, padding=1), nn.ReLU(),
+            # nn.Flatten(),
+            # # This part is still hardcoded based on the image size
+            # nn.Linear(64 * 224 * 224, 1), nn.Sigmoid()
+            # # nn.Linear(64, 1), nn.Sigmoid()
+            
             nn.Conv2d(in_channels, 64, 3, padding=1), nn.ReLU(),
+            nn.Conv2d(64, 1, 3, padding=1), nn.ReLU(),
+            nn.AvgPool2d(4, 4),
             nn.Flatten(),
-            # This part is still hardcoded based on the image size
-            nn.Linear(64 * 224 * 224, 64), nn.ReLU(),
-            nn.Linear(64, 1), nn.Sigmoid()
+            nn.Linear(56 * 56, 1),
+            nn.Sigmoid()
         )
 
     def forward(self, x):
@@ -44,16 +51,19 @@ class Flat_MoE(nn.Module):
         self.router_list = nn.ModuleList(
             [Router(self.in_channels) for _ in range(self.number_of_experts)])
 
-    def forward(self, x):
+    def forward(self, x, epoch = 3):
         partial_segmentation_maps = []
+        router_outputs = []
         for expert_number in range(self.number_of_experts):
             router_output = self.router_list[expert_number](x)
             expert_output = self.expert_list[expert_number](x)
-            # expert_output = router_output * expert_output
-            expert_output = router_output.detach().view(-1, 1, 1, 1) * expert_output
+            router_output = router_output.view(1, 1, 1, 1)
+            if epoch > 2:
+                expert_output = router_output * expert_output
             partial_segmentation_maps.append(expert_output)
+            router_outputs.append(router_output)
 
         output = sum(partial_segmentation_maps)
         partial_segmentation_maps = torch.stack(
             partial_segmentation_maps, dim=0)
-        return output, partial_segmentation_maps
+        return output, partial_segmentation_maps, router_outputs

@@ -91,7 +91,7 @@ scaler = torch.amp.GradScaler('cuda')
 losses = []
 for epoch in range(NUM_EPOCHS):
 
-    loss = train_fn(train_loader, model, optimizer, loss_fn1, loss_fn2, scaler)
+    loss = train_fn(train_loader, model, optimizer, loss_fn1, loss_fn2, scaler, epoch)
     losses.append(loss)
     # save model
     checkpoint = {

@@ -13,15 +13,15 @@ def plot_gradient_flow(model):
             layers.append(name)
             ave_grads.append(param.grad.abs().mean().item())
 
-    plt.figure(figsize=(10, 5))
+    plt.figure(figsize=(10, 8))
     plt.bar(layers, ave_grads, color="b", alpha=0.6)
     plt.hlines(0, 0, len(ave_grads), color="k",
                linestyle="dashed", linewidth=0.5)
-    plt.xticks(rotation=90)
+    plt.xticks(rotation=45, fontsize=5)
     plt.xlabel("Layers")
     plt.ylabel("Average Gradient Magnitude")
     plt.title("Gradient Flow")
-    plt.savefig("figures/graph.png")
+    plt.savefig("../data/graph.png")
     plt.close()
 
 def save_checkpoint(state, filename='my_checkpoint.pth.tar'):
@@ -77,7 +77,7 @@ def check_accuracy(loader, model, device='cuda'):
         for x, y in loader:
             x = x.to(device)
             y = y.to(device).unsqueeze(1)
-            preds, _ = model(x)
+            preds, _, _ = model(x)
             preds = torch.sigmoid(preds)
             preds = (preds > 0.5).float()
             num_correct += (preds == y).sum()
@@ -101,7 +101,7 @@ def save_predictions_as_imgs(
     for idx, (x, y) in enumerate(loader):
         x = x.to(device=device)
         with torch.no_grad():
-            preds, expert_outputs = model(x)
+            preds, expert_outputs, _ = model(x)
             preds = torch.sigmoid(preds)
             preds = (preds > 0.5).float()
         torchvision.utils.save_image(
@@ -113,7 +113,7 @@ def save_predictions_as_imgs(
                     expert_outputs[layer][expert], f'{folder}/expert_outputs/{idx}_{layer}_{expert}.png')
 
 
-def train_fn(loader, model, optimizer, loss_fn1, loss_fn2, scaler):
+def train_fn(loader, model, optimizer, loss_fn1, loss_fn2, scaler, epoch):
 
     loop = tqdm(loader)
     losses = []
@@ -126,7 +126,8 @@ def train_fn(loader, model, optimizer, loss_fn1, loss_fn2, scaler):
 
         with torch.amp.autocast('cuda'):
 
-            predictions, expert_output = model(data)
+            predictions, expert_output, router_outputs = model(data, epoch)
+            targets = torch.stack([(1 - target) for target in targets])
             loss1, loss2 = loss_fn1(predictions, targets), loss_fn2(expert_output)
             # losses.append((loss1, loss2))
             loss = loss1 + loss2
@@ -147,6 +148,10 @@ def train_fn(loader, model, optimizer, loss_fn1, loss_fn2, scaler):
 
         # update tqdm loop
 
-        loop.set_postfix(loss=loss.item())
+        loop.set_postfix(
+            loss=loss.item(),
+            router_outputs=",".join(
+                [f"{t.item():.2f}" for t in router_outputs])
+        )
             
     # return losses
